@@ -9,14 +9,14 @@ import (
 )
 
 type MyClaim struct {
-	EmployeeID      int 
+	EmployeeID int
 	jwt.StandardClaims
 }
 
 func TokenCreate(employeeID int) string {
 	var jwtKey = []byte(os.Getenv("JWT_KEY"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, MyClaim{
-		EmployeeID:      employeeID,
+		EmployeeID: employeeID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(72 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),

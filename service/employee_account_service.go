@@ -12,9 +12,9 @@ import (
 
 func (s *Service) EmployeeAccountLogin(c *gin.Context, request model.EmployeeAccountLoginParam) (*model.EmployeeAccountLoginResponse, error) {
 	var (
-		err error
+		err             error
 		employeeAccount *model.EmployeeAccount
-		accessToken string
+		accessToken     string
 	)
 
 	employeeAccount, err = s.EmployeeAccountGetByLoginUsername(c, request.LoginUsername)
@@ -33,13 +33,13 @@ func (s *Service) EmployeeAccountLogin(c *gin.Context, request model.EmployeeAcc
 
 	return &model.EmployeeAccountLoginResponse{
 		EmployeeAccount: employeeAccount,
-		AccessToken: accessToken,
+		AccessToken:     accessToken,
 	}, nil
 }
 
 func (s *Service) EmployeeAccountRegister(c *gin.Context, request model.EmployeeAccountRegisterParam) (*model.EmployeeAccount, error) {
 	var (
-		err error
+		err             error
 		employeeAccount *model.EmployeeAccount
 	)
 
@@ -47,7 +47,7 @@ func (s *Service) EmployeeAccountRegister(c *gin.Context, request model.Employee
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if employeeAccount != nil {
 		return nil, fmt.Errorf("username has been used before, please choose another username")
 	}
@@ -79,7 +79,7 @@ func (s *Service) EmployeeAccountUpdateLoginedAt(c *gin.Context, accountID int) 
 	var (
 		currentTime = time.Now()
 	)
-	
+
 	if err := s.DB.Model(&model.EmployeeAccount{}).Where("account_id = ?", accountID).UpdateColumn("logined_at", currentTime).Error; err != nil {
 		return err
 	}
@@ -89,13 +89,13 @@ func (s *Service) EmployeeAccountUpdateLoginedAt(c *gin.Context, accountID int) 
 
 func (s *Service) EmployeeAccountCreate(c *gin.Context, request model.EmployeeAccountRegisterParam) (*model.EmployeeAccount, error) {
 	var (
-		currentTime = time.Now()
+		currentTime     = time.Now()
 		employeeAccount = model.EmployeeAccount{
-			EmployeeID: request.EmployeeID,
+			EmployeeID:    request.EmployeeID,
 			LoginUsername: request.LoginUsername,
-			LoginPassword: request.LoginPassword,
-			RoleID: request.RoleID,
-			CreatedAt: currentTime,
+			LoginPassword: tool.HashPassword(request.LoginPassword),
+			RoleID:        request.RoleID,
+			CreatedAt:     currentTime,
 		}
 	)
 

@@ -3,6 +3,7 @@ package main
 import (
 	"myapp/config"
 	"myapp/controller"
+	"myapp/tool"
 	"os"
 
 	"myapp/middleware"
@@ -14,6 +15,7 @@ const defaultPort = "8080"
 
 func init() {
 	config.ConnectDB()
+	tool.InitValidator()
 }
 
 func main() {
@@ -31,13 +33,14 @@ func main() {
 	router.POST("/login", controller.EmployeeAccountLogin)
 	router.POST("/register", controller.EmployeeAccountRegister)
 
-	authRouter := router.Use(middleware.Authorize()) 
+	authGroup := router.Group("")
+	authGroup.Use(middleware.Authorize())
 
-	authRouter.GET("/employee:id", controller.EmployeeGetDetail)
-	authRouter.GET("/employees", controller.EmployeeGetlist)
-	authRouter.POST("/employee", controller.EmployeeCreate)
-	authRouter.PUT("/employee", controller.EmployeeUpdate)
-	authRouter.DELETE("/employee:id", controller.EmployeeDelete)
+	authGroup.GET("/employee/:id", controller.EmployeeGetDetail)
+	authGroup.GET("/employees", controller.EmployeeGetlist)
+	authGroup.POST("/employee", controller.EmployeeCreate)
+	authGroup.PUT("/employee", controller.EmployeeUpdate)
+	authGroup.DELETE("/employee/:id", controller.EmployeeDelete)
 
-	router.Run("localhost:"+port)
+	router.Run("localhost:" + port)
 }

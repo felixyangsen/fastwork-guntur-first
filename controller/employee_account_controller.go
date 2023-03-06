@@ -3,6 +3,7 @@ package controller
 import (
 	"myapp/model"
 	"myapp/service"
+	"myapp/tool"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 
 func EmployeeAccountLogin(c *gin.Context) {
 	var (
-		s = service.GetService()
+		s   = service.GetService()
 		err error
 
 		param model.EmployeeAccountLoginParam
@@ -19,13 +20,19 @@ func EmployeeAccountLogin(c *gin.Context) {
 	)
 
 	if err := c.ShouldBindJSON(&param); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = tool.ValidateStruct(param)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	response, err = s.EmployeeAccountLogin(c, param)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -34,7 +41,7 @@ func EmployeeAccountLogin(c *gin.Context) {
 
 func EmployeeAccountRegister(c *gin.Context) {
 	var (
-		s = service.GetService()
+		s   = service.GetService()
 		err error
 
 		param model.EmployeeAccountRegisterParam
@@ -42,16 +49,22 @@ func EmployeeAccountRegister(c *gin.Context) {
 		employeeAccount *model.EmployeeAccount
 	)
 
-	if err := c.ShouldBindJSON(&param); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBind(&param); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = tool.ValidateStruct(param)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	employeeAccount, err = s.EmployeeAccountRegister(c, param)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, employeeAccount)
 }

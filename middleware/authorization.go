@@ -16,37 +16,37 @@ type contextKey struct {
 }
 
 type Employee struct {
-	ID      int `json:"id"`
+	ID int `json:"id"`
 }
 
 func Authorize() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authToken := c.Request.Header.Get("Authorization")
 		if authToken == "" {
-			c.Next()
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 
 		authTokens := strings.Split(authToken, " ")
 		if authTokens[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, "unauthorized")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 
 		jwtToken, err := tool.TokenValidate(authTokens[1])
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, "invalid token")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
 		}
 
 		claims, ok := jwtToken.Claims.(*tool.MyClaim)
 		if !ok || !jwtToken.Valid {
-			c.JSON(http.StatusUnauthorized, "invalid token")
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return
 		}
 
 		ctx := context.WithValue(c.Request.Context(), CtxKey, &Employee{
-			ID:      claims.EmployeeID,
+			ID: claims.EmployeeID,
 		})
 
 		c.Request = c.Request.WithContext(ctx)
